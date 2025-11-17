@@ -31,6 +31,8 @@ export interface PostWithState {
   description: string
   imageAlt: string
   imageUrl: string
+  author: string
+  timeAgo: string
   likes: number
   saves: number
   liked: boolean

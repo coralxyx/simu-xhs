@@ -10,7 +10,7 @@ const App = () => {
   return (
     <EventLoggerProvider>
       <BrowserRouter>
-        <div className="min-h-screen bg-gradient-to-br from-rose-50 via-white to-rose-100">
+        <div className="min-h-screen bg-white">
           <Routes>
             <Route path="/" element={<FeedPage />} />
             <Route path="/admin" element={<AdminPage />} />

@@ -6,14 +6,14 @@ interface PostCardProps {
   post: PostWithState
   onSelect: (postId: string) => void
   onToggleLike: (postId: string) => void
-  onToggleSave: (postId: string) => void
+  onToggleSave?: (postId: string) => void
 }
 
 /**
  * @param {PostCardProps} props 卡片属性
  * @returns {JSX.Element} Feed中的单个卡片
  */
-export const PostCard = ({ post, onSelect, onToggleLike, onToggleSave }: PostCardProps) => {
+export const PostCard = ({ post, onSelect, onToggleLike }: PostCardProps) => {
   const handleCardClick = () => onSelect(post.id)
 
   const handleLike = (event: MouseEvent<HTMLButtonElement>) => {
@@ -21,53 +21,57 @@ export const PostCard = ({ post, onSelect, onToggleLike, onToggleSave }: PostCar
     onToggleLike(post.id)
   }
 
-  const handleSave = (event: MouseEvent<HTMLButtonElement>) => {
-    event.stopPropagation()
-    onToggleSave(post.id)
-  }
-
   return (
     <article
-      className="flex cursor-pointer flex-col overflow-hidden rounded-3xl bg-white shadow-sm transition hover:-translate-y-0.5 hover:shadow-lg"
+      className="flex cursor-pointer flex-col bg-white transition hover:opacity-90"
       onClick={handleCardClick}
     >
-      <div className="relative h-64 w-full overflow-hidden bg-gradient-to-br from-rose-100 via-white to-rose-200">
+      {/* 圆角图片 */}
+      <div className="relative w-full overflow-hidden rounded-2xl bg-gray-100">
         <img
           src={post.imageUrl}
           alt={post.imageAlt}
-          className="h-full w-full object-cover"
+          className="aspect-[3/4] w-full object-cover"
           loading="lazy"
         />
       </div>
-      <div className="flex flex-1 flex-col gap-3 p-4">
-        <div>
-          <h3 className="text-lg font-semibold text-gray-900 line-clamp-2">{post.title}</h3>
-          <p className="mt-1 text-sm text-gray-500 line-clamp-2">{post.description}</p>
-        </div>
-        <div className="mt-auto flex items-center justify-between rounded-2xl bg-gray-50 px-4 py-2 text-sm text-gray-600">
+      
+      {/* 标题 */}
+      <h3 className="mt-2 line-clamp-2 text-sm font-medium text-gray-900 leading-5">
+        {post.title}
+      </h3>
+      
+      {/* 用户信息、时间和点赞并排显示 */}
+      <div className="mt-2 flex items-center gap-2 text-xs text-gray-500">
+        <span className="truncate">{post.author}</span>
+        <span>·</span>
+        <span className="shrink-0">{post.timeAgo}</span>
+        <span className="ml-auto shrink-0">
           <button
             type="button"
             onClick={handleLike}
             className={clsx(
-              'flex items-center gap-1.5 font-medium transition',
-              post.liked ? 'text-brand-primary' : 'text-gray-600 hover:text-brand-primary',
+              'flex items-center gap-1 transition-colors',
+              post.liked ? 'text-red-500' : 'text-gray-500 hover:text-red-500',
             )}
           >
-            <span aria-hidden="true">♥</span>
-            <span>Likes {post.likes}</span>
+            <svg
+              className="h-3.5 w-3.5"
+              fill={post.liked ? 'currentColor' : 'none'}
+              stroke="currentColor"
+              viewBox="0 0 24 24"
+              xmlns="http://www.w3.org/2000/svg"
+            >
+              <path
+                strokeLinecap="round"
+                strokeLinejoin="round"
+                strokeWidth={2}
+                d="M4.318 6.318a4.5 4.5 0 000 6.364L12 20.364l7.682-7.682a4.5 4.5 0 00-6.364-6.364L12 7.636l-1.318-1.318a4.5 4.5 0 00-6.364 0z"
+              />
+            </svg>
+            <span>{post.likes}</span>
           </button>
-          <button
-            type="button"
-            onClick={handleSave}
-            className={clsx(
-              'flex items-center gap-1.5 font-medium transition',
-              post.saved ? 'text-brand-primary' : 'text-gray-600 hover:text-brand-primary',
-            )}
-          >
-            <span aria-hidden="true">★</span>
-            <span>Saves {post.saves}</span>
-          </button>
-        </div>
+        </span>
       </div>
     </article>
   )
