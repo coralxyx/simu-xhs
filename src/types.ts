@@ -1,5 +1,4 @@
 export type PostEventType =
-  | 'feed_impression'
   | 'card_click'
   | 'open_detail'
   | 'close_detail'

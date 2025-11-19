@@ -44,6 +44,19 @@ const downloadText = (filename: string, content: string, type: string) => {
 }
 
 /**
+ * 事件类型映射到中文
+ */
+const eventTypeMap: Record<string, string> = {
+  card_click: '点击',
+  open_detail: '打开详情',
+  close_detail: '关闭详情',
+  like: '点赞',
+  unlike: '取消点赞',
+  save: '收藏',
+  unsave: '取消收藏',
+}
+
+/**
  * @returns {JSX.Element} Admin页面
  */
 export const AdminPage = () => {
@@ -52,13 +65,29 @@ export const AdminPage = () => {
   const csvText = useMemo(() => buildCsv(events), [events])
   const jsonText = useMemo(() => JSON.stringify(events, null, 2), [events])
 
+  // 计算统计数据
+  const stats = useMemo(() => {
+    const clickCount = events.filter((e) => e.eventType === 'card_click').length
+    const likeCount = events.filter((e) => e.eventType === 'like').length
+    const saveCount = events.filter((e) => e.eventType === 'save').length
+    const totalOperations = events.length
+    return { clickCount, likeCount, saveCount, totalOperations }
+  }, [events])
+
+  // 提取点击顺序
+  const clickSequence = useMemo(() => {
+    return events
+      .filter((e) => e.eventType === 'card_click' && e.postId)
+      .map((e) => e.postId!)
+  }, [events])
+
   return (
-    <div className="mx-auto flex min-h-screen max-w-6xl flex-col gap-6 px-4 py-8">
-      <header className="flex flex-col gap-4 md:flex-row md:items-center md:justify-between">
+    <div className="mx-auto flex min-h-screen max-w-6xl flex-col gap-6 px-4 py-8 bg-gradient-to-br from-gray-50/50 via-white to-blue-50/20">
+      <header className="flex flex-col gap-4 md:flex-row md:items-center md:justify-between bg-white/80 backdrop-blur-sm rounded-xl p-6 shadow-sm border border-gray-200/50">
         <div>
           <p className="text-xs font-semibold uppercase tracking-wide text-brand-primary">Researcher</p>
-          <h1 className="text-3xl font-bold text-gray-900">交互事件追踪面板</h1>
-          <p className="text-sm text-gray-500">Session ID: {sessionId}</p>
+          <h1 className="text-3xl font-bold bg-gradient-to-r from-gray-900 to-gray-700 bg-clip-text text-transparent">交互事件追踪面板</h1>
+          <p className="text-sm text-gray-500 mt-1">Session ID: <span className="font-mono text-gray-700">{sessionId}</span></p>
         </div>
         <div className="flex flex-wrap gap-3">
           <Link
@@ -92,7 +121,49 @@ export const AdminPage = () => {
           </button>
         </div>
       </header>
-      <EventLogTable events={events} />
+
+      {/* 统计卡片 */}
+      <div className="grid grid-cols-2 gap-4 md:grid-cols-4">
+        <div className="rounded-xl bg-gradient-to-br from-blue-50/50 to-white p-5 shadow-sm border border-blue-100/50">
+          <div className="text-4xl font-bold text-blue-500">{stats.clickCount}</div>
+          <div className="mt-1 text-sm font-medium text-blue-400">点击次数</div>
+        </div>
+        <div className="rounded-xl bg-gradient-to-br from-pink-50/50 to-white p-5 shadow-sm border border-pink-100/50">
+          <div className="text-4xl font-bold text-pink-500">{stats.likeCount}</div>
+          <div className="mt-1 text-sm font-medium text-pink-400">点赞次数</div>
+        </div>
+        <div className="rounded-xl bg-gradient-to-br from-amber-50/50 to-white p-5 shadow-sm border border-amber-100/50">
+          <div className="text-4xl font-bold text-amber-500">{stats.saveCount}</div>
+          <div className="mt-1 text-sm font-medium text-amber-400">收藏次数</div>
+        </div>
+        <div className="rounded-xl bg-gradient-to-br from-purple-50/50 to-white p-5 shadow-sm border border-purple-100/50">
+          <div className="text-4xl font-bold text-purple-500">{stats.totalOperations}</div>
+          <div className="mt-1 text-sm font-medium text-purple-400">总操作数</div>
+        </div>
+      </div>
+
+      {/* 点击顺序 */}
+      {clickSequence.length > 0 && (
+        <div className="rounded-xl bg-gradient-to-br from-white to-gray-50 p-6 shadow-sm border border-gray-200">
+          <h2 className="mb-4 text-base font-semibold text-gray-900">点击顺序</h2>
+          <div className="flex flex-wrap gap-3">
+            {clickSequence.map((postId, index) => (
+              <div
+                key={`${postId}-${index}`}
+                className="rounded-lg bg-gradient-to-r from-blue-50/70 to-indigo-50/70 px-4 py-2 text-sm font-medium text-blue-500 shadow-sm border border-blue-100/50 hover:from-blue-100/70 hover:to-indigo-100/70 transition-all"
+              >
+                {index + 1}. 帖子#{postId}
+              </div>
+            ))}
+          </div>
+        </div>
+      )}
+
+      {/* 详细操作记录 */}
+      <div className="rounded-xl bg-gradient-to-br from-white to-gray-50 p-6 shadow-sm border border-gray-200">
+        <h2 className="mb-4 text-base font-semibold text-gray-900">详细操作记录</h2>
+        <EventLogTable events={events} eventTypeMap={eventTypeMap} />
+      </div>
     </div>
   )
 }

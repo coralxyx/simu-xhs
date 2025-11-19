@@ -1,4 +1,4 @@
-import { useEffect, useMemo, useRef, useState } from 'react'
+import { useMemo, useState } from 'react'
 import { Link } from 'react-router-dom'
 import { PostCard } from '../components/PostCard'
 import { PostDetailModal } from '../components/PostDetailModal'
@@ -36,19 +36,6 @@ export const FeedPage = () => {
   const [posts, setPosts] = useState<PostWithState[]>(() => buildInitialPosts())
   const [activePostId, setActivePostId] = useState<string | null>(null)
   const { logEvent } = useEventLoggerContext()
-  const hasLoggedImpression = useRef(false)
-
-  useEffect(() => {
-    if (hasLoggedImpression.current) return
-    posts.forEach((post) =>
-      logEvent({
-        postId: post.id,
-        eventType: 'feed_impression',
-        state: { ...toSnapshot(post), detailOpen: false },
-      }),
-    )
-    hasLoggedImpression.current = true
-  }, [logEvent, posts])
 
   const selectedPost = useMemo(
     () => posts.find((post) => post.id === activePostId) ?? null,
@@ -143,11 +130,9 @@ export const FeedPage = () => {
       <header className="flex flex-col gap-3 md:flex-row md:items-end md:justify-between">
         <div>
           <p className="text-xs font-semibold uppercase tracking-[0.2em] text-brand-primary">
-            XHS实验
+            小红书模拟平台
           </p>
-          <h1 className="text-3xl font-bold text-gray-900">灵感瀑布流</h1>
-          <p className="text-sm text-gray-500">
-            探索8条精选灵感，所有贴文初始互动数为0，方便实验采集。
+          <p className="text-sm text-gray-500">请在一分钟随意操作（除了查看数据面板），一分钟后点击查看研究面板导出csv发给研究人员
           </p>
         </div>
         <Link
