@@ -8,11 +8,12 @@ import { EventLogTable } from '../components/EventLogTable'
  * @returns {string} CSV字符串
  */
 const buildCsv = (events: ReturnType<typeof useEventLoggerContext>['events']): string => {
-  const header = ['id', 'sessionId', 'postId', 'eventType', 'timestamp', 'likes', 'saves', 'liked', 'saved', 'detailOpen']
+  const header = ['id', 'sessionId', 'postId', 'imageId', 'eventType', 'timestamp', 'likes', 'saves', 'liked', 'saved', 'detailOpen']
   const rows = events.map((event) => [
     event.id,
     event.sessionId,
     event.postId ?? '',
+    event.state?.imageId ?? '',
     event.eventType,
     event.timestamp,
     event.state?.likes ?? '',

@@ -9,6 +9,12 @@ import type { PostStateSnapshot, PostWithState } from '../types'
 const INITIAL_LIKE_COUNT = 0
 const INITIAL_SAVE_COUNT = 0
 
+const getImageId = (imageUrl: string): string => {
+  const filename = imageUrl.split('/').filter(Boolean).pop() ?? imageUrl
+  const base = filename.split('.').shift() ?? filename
+  return base
+}
+
 const shuffleArray = <T,>(items: T[]): T[] => {
   const shuffled = [...items]
   for (let i = shuffled.length - 1; i > 0; i -= 1) {
@@ -39,6 +45,7 @@ const toSnapshot = (post: PostWithState): PostStateSnapshot => ({
   saves: post.saves,
   liked: post.liked,
   saved: post.saved,
+  imageId: getImageId(post.imageUrl),
 })
 
 /**

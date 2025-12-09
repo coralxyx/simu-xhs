@@ -14,6 +14,7 @@ export interface PostStateSnapshot {
   liked: boolean
   saved: boolean
   detailOpen?: boolean
+  imageId?: string
 }
 
 export interface PostEvent {

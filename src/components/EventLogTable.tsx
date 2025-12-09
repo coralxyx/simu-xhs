@@ -62,7 +62,7 @@ export const EventLogTable = ({ events, eventTypeMap = {} }: EventLogTableProps)
             <tr>
               <th className="px-4 py-3">顺序</th>
               <th className="px-4 py-3">行为类型</th>
-              <th className="px-4 py-3">帖子ID</th>
+              <th className="px-4 py-3">图片ID</th>
               <th className="px-4 py-3">时间戳</th>
             </tr>
           </thead>
@@ -79,7 +79,9 @@ export const EventLogTable = ({ events, eventTypeMap = {} }: EventLogTableProps)
                       {eventTypeText}
                     </span>
                   </td>
-                  <td className="px-4 py-3 text-gray-600 font-mono text-xs">{event.postId ?? '—'}</td>
+                  <td className="px-4 py-3 text-gray-600 font-mono text-xs">
+                    {event.state?.imageId ?? '—'}
+                  </td>
                   <td className="px-4 py-3 text-gray-600">{formatTimestamp(event.timestamp)}</td>
                 </tr>
               )
