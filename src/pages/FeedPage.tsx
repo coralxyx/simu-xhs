@@ -3,20 +3,32 @@ import { Link } from 'react-router-dom'
 import { PostCard } from '../components/PostCard'
 import { PostDetailModal } from '../components/PostDetailModal'
 import { useEventLoggerContext } from '../context/EventLoggerContext'
-import { basePosts } from '../data/posts'
+import { basePosts, postImages } from '../data/posts'
 import type { PostStateSnapshot, PostWithState } from '../types'
 
 const INITIAL_LIKE_COUNT = 0
 const INITIAL_SAVE_COUNT = 0
 
-const buildInitialPosts = (): PostWithState[] =>
-  basePosts.map((post) => ({
+const shuffleArray = <T,>(items: T[]): T[] => {
+  const shuffled = [...items]
+  for (let i = shuffled.length - 1; i > 0; i -= 1) {
+    const j = Math.floor(Math.random() * (i + 1))
+    ;[shuffled[i], shuffled[j]] = [shuffled[j], shuffled[i]]
+  }
+  return shuffled
+}
+
+const buildInitialPosts = (): PostWithState[] => {
+  const randomizedImages = shuffleArray(postImages)
+  return basePosts.map((post, index) => ({
     ...post,
+    imageUrl: randomizedImages[index % randomizedImages.length],
     likes: INITIAL_LIKE_COUNT,
     saves: INITIAL_SAVE_COUNT,
     liked: false,
     saved: false,
   }))
+}
 
 /**
  * @param {PostWithState} post 单个贴文状态
