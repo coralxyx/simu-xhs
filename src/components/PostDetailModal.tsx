@@ -35,11 +35,11 @@ export const PostDetailModal = ({
         {/* 内容区域 */}
         <div className="grid h-full grid-cols-1 overflow-hidden md:grid-cols-2">
           {/* 图片区域 */}
-          <div className="relative h-[50vh] w-full bg-gray-100 md:h-full">
+          <div className="relative flex h-[60vh] w-full items-center justify-center bg-black md:h-full">
             <img
               src={post.imageUrl}
               alt={post.imageAlt}
-              className="h-full w-full object-cover"
+              className="max-h-full max-w-full object-contain"
             />
           </div>
 
