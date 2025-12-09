@@ -6,6 +6,7 @@ export type PostEventType =
   | 'unlike'
   | 'save'
   | 'unsave'
+  | 'feed_impression'
 
 export interface PostStateSnapshot {
   likes: number

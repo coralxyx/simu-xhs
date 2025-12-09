@@ -62,24 +62,30 @@ const eventTypeMap: Record<string, string> = {
 export const AdminPage = () => {
   const { events, sessionId, clearEvents } = useEventLoggerContext()
 
+  // 过滤掉 feed_impression，不在页面展示
+  const visibleEvents = useMemo(
+    () => events.filter((e) => e.eventType !== 'feed_impression'),
+    [events],
+  )
+
   const csvText = useMemo(() => buildCsv(events), [events])
   const jsonText = useMemo(() => JSON.stringify(events, null, 2), [events])
 
   // 计算统计数据
   const stats = useMemo(() => {
-    const clickCount = events.filter((e) => e.eventType === 'card_click').length
-    const likeCount = events.filter((e) => e.eventType === 'like').length
-    const saveCount = events.filter((e) => e.eventType === 'save').length
-    const totalOperations = events.length
+    const clickCount = visibleEvents.filter((e) => e.eventType === 'card_click').length
+    const likeCount = visibleEvents.filter((e) => e.eventType === 'like').length
+    const saveCount = visibleEvents.filter((e) => e.eventType === 'save').length
+    const totalOperations = visibleEvents.length
     return { clickCount, likeCount, saveCount, totalOperations }
-  }, [events])
+  }, [visibleEvents])
 
   // 提取点击顺序
   const clickSequence = useMemo(() => {
-    return events
+    return visibleEvents
       .filter((e) => e.eventType === 'card_click' && e.postId)
       .map((e) => e.postId!)
-  }, [events])
+  }, [visibleEvents])
 
   return (
     <div className="mx-auto flex min-h-screen max-w-6xl flex-col gap-6 px-4 py-8 bg-gradient-to-br from-gray-50/50 via-white to-blue-50/20">
@@ -162,7 +168,7 @@ export const AdminPage = () => {
       {/* 详细操作记录 */}
       <div className="rounded-xl bg-gradient-to-br from-white to-gray-50 p-6 shadow-sm border border-gray-200">
         <h2 className="mb-4 text-base font-semibold text-gray-900">详细操作记录</h2>
-        <EventLogTable events={events} eventTypeMap={eventTypeMap} />
+        <EventLogTable events={visibleEvents} eventTypeMap={eventTypeMap} />
       </div>
     </div>
   )

@@ -27,7 +27,7 @@ export const PostCard = ({ post, onSelect, onToggleLike }: PostCardProps) => {
       onClick={handleCardClick}
     >
       {/* 圆角图片 */}
-      <div className="relative w-full overflow-hidden rounded-2xl bg-gray-100">
+      <div className="relative w-full overflow-hidden rounded-md bg-gray-100">
         <img
           src={post.imageUrl}
           alt={post.imageAlt}
