@@ -4,38 +4,52 @@ import { Link } from 'react-router-dom'
 import { useEventLoggerContext } from '../context/EventLoggerContext'
 import { EventLogTable } from '../components/EventLogTable'
 
-/**
- * @returns {string} CSV字符串
- */
-const buildCsv = (events: ReturnType<typeof useEventLoggerContext>['events']): string => {
-  const header = ['id', 'sessionId', 'postId', 'imageId', 'eventType', 'timestamp', 'likes', 'saves', 'liked', 'saved', 'detailOpen']
-  const rows = events.map((event) => [
-    event.id,
-    event.sessionId,
-    event.postId ?? '',
-    event.state?.imageId ?? '',
-    event.eventType,
-    event.timestamp,
-    event.state?.likes ?? '',
-    event.state?.saves ?? '',
-    event.state?.liked ?? '',
-    event.state?.saved ?? '',
-    event.state?.detailOpen ?? '',
-  ])
-  return [header, ...rows].map((columns) =>
-    columns
-      .map((value) => `"${String(value).replace(/"/g, '""')}"`)
-      .join(','),
-  ).join('\n')
+const formatTimestamp = (timestamp: string): string => {
+  const date = new Date(timestamp)
+  const year = date.getFullYear()
+  const month = String(date.getMonth() + 1).padStart(2, '0')
+  const day = String(date.getDate()).padStart(2, '0')
+  const hours = String(date.getHours()).padStart(2, '0')
+  const minutes = String(date.getMinutes()).padStart(2, '0')
+  const seconds = String(date.getSeconds()).padStart(2, '0')
+  return `${year}/${month}/${day} ${hours}:${minutes}:${seconds}`
 }
 
-/**
- * @param {string} filename 文件名
- * @param {string} content 文本内容
- * @param {string} type MIME类型
- */
-const downloadText = (filename: string, content: string, type: string) => {
-  const blob = new Blob([content], { type })
+const escapeCell = (value: string): string =>
+  String(value)
+    .replace(/&/g, '&amp;')
+    .replace(/</g, '&lt;')
+    .replace(/>/g, '&gt;')
+    .replace(/"/g, '&quot;')
+
+const buildExcelHtml = (
+  events: ReturnType<typeof useEventLoggerContext>['events'],
+  eventTypeMap: Record<string, string>,
+): string => {
+  const headerCells = ['顺序', '行为类型', '图片ID', '时间戳']
+  const headerRow = `<tr>${headerCells.map((cell) => `<th>${cell}</th>`).join('')}</tr>`
+  const rows = events
+    .map((event, index) => {
+      const cells = [
+        index + 1,
+        eventTypeMap[event.eventType] || event.eventType,
+        event.state?.imageId ?? '',
+        formatTimestamp(event.timestamp),
+      ]
+      return `<tr>${cells.map((cell) => `<td>${escapeCell(String(cell))}</td>`).join('')}</tr>`
+    })
+    .join('')
+
+  return `<!DOCTYPE html><html><head><meta charset="UTF-8" /></head><body><table>${headerRow}${rows}</table></body></html>`
+}
+
+const downloadExcel = (
+  filename: string,
+  events: ReturnType<typeof useEventLoggerContext>['events'],
+  eventTypeMap: Record<string, string>,
+) => {
+  const html = buildExcelHtml(events, eventTypeMap)
+  const blob = new Blob([html], { type: 'application/vnd.ms-excel' })
   const url = URL.createObjectURL(blob)
   const link = document.createElement('a')
   link.href = url
@@ -68,9 +82,6 @@ export const AdminPage = () => {
     () => events.filter((e) => e.eventType !== 'feed_impression'),
     [events],
   )
-
-  const csvText = useMemo(() => buildCsv(events), [events])
-  const jsonText = useMemo(() => JSON.stringify(events, null, 2), [events])
 
   // 计算统计数据
   const stats = useMemo(() => {
@@ -105,19 +116,11 @@ export const AdminPage = () => {
           </Link>
           <button
             type="button"
-            onClick={() => downloadText(`xhs-events-${sessionId}.json`, jsonText, 'application/json')}
-            className="flex items-center gap-1 rounded-2xl bg-gray-900 px-4 py-2 text-sm font-semibold text-white shadow hover:bg-gray-800"
-          >
-            <Download size={16} />
-            JSON
-          </button>
-          <button
-            type="button"
-            onClick={() => downloadText(`xhs-events-${sessionId}.csv`, csvText, 'text/csv')}
+            onClick={() => downloadExcel(`xhs-events-${sessionId}.xls`, visibleEvents, eventTypeMap)}
             className="flex items-center gap-1 rounded-2xl bg-brand-primary px-4 py-2 text-sm font-semibold text-white shadow hover:bg-brand-primary/90"
           >
             <Download size={16} />
-            CSV
+            Excel
           </button>
           <button
             type="button"
